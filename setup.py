@@ -56,6 +56,6 @@ setuptools.setup(
 	cmdclass = {'build_ext': BuildExtension},
 	packages=setuptools.find_packages(),
 	ext_modules = extensions,
-	setup_requires = ["cython>=0.28", "numpy>=1.14.0"],
+	setup_requires = ['cython>=0.28', 'numpy>=1.14.0', 'keras-resnet==0.2.0', 'six', 'scipy', 'cython', 'Pillow', 'opencv-python', 'progressbar2'],
 	zip_safe=False,
 )
