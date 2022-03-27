@@ -1,16 +1,31 @@
 # OPTIMAL-IPB
 
-OPTIMAL-IPB (Oil Palm Trees Identification based on Machine Learning – IPB University) is an open access plugin in Quantum GIS software used to detect oil palm trees canopy on high-resolution satellite images. This plugin was developed based on deep learning models on Retinanet architecture implemented on the repository by [Fizyr](https://github.com/fizyr/keras-retinanet). Some modifications were applied to enhance the model’s accuracy in detecting oil palm trees canopy as small objects. OPTIMAL-IPB was built by researchers from the Center for Regional System, Analysis, Planning and Development (P4W/CRESTPENT), IPB University, Indonesia. It was based on research funded by the Indonesia Endowment Fund for Education (LPDP) – the Ministry of Finance.
+OPTIMAL-IPB (Oil Palm Trees Identification based on Machine Learning – IPB University) is an open access plugin in Quantum GIS software used to detect oil palm trees canopy on high-resolution satellite images. This plugin was developed based on deep learning models on Retinanet architecture implemented on the repository by [Fizyr](https://github.com/fizyr/keras-retinanet). Some modifications were applied to enhance the model’s accuracy in detecting oil palm trees canopy as small objects. OPTIMAL-IPB was built by researchers from the [Center for Regional System, Analysis, Planning and Development (P4W/CRESTPENT)](https://p4w.ipb.ac.id), IPB University, Indonesia. It was based on research funded by the [Indonesia Endowment Fund for Education (LPDP)](https://lpdp.kemenkeu.go.id) – the Ministry of Finance.
 
 ## Installation Steps
 
-### 1. Module Required
-Open python console in QGIS and run `import pip` then `pip.main(['install', '-q', '--disable-pip-version-check', 'six ', 'scipy', 'cython', 'keras-resnet==0.2.0', 'h5py', 'keras', 'matplotlib', 'numpy>=1.14', 'opencv-python>=3.3.0', 'pillow', 'progressbar2', 'tensorflow>=2.3.0'])` to install all the prerequisites.
+### 1. Package Required
 
-The installation process time depends on the internet connection speed.
+Some packages need to be installed in the QGIS environment first. There are two ways to install packages in the QGIS environment.
+
+#### - Package installation via python console in QGIS
+
+Open python console in QGIS and run `import pip` then `pip.main(['install', '-q', '--disable-pip-version-check', 'scipy', 'cython', 'keras-resnet==0.2.0', 'opencv-python>=3.3.0', 'pillow', 'progressbar2', 'tensorflow>=2.3.0'])` to install all the prerequisites.
+
+#### - Module installation via OSGeo4W Shell
+
+Open OSGeo4W Shell then run this command `python3 -m pip install scipy cython keras-resnet==0.2.0 opencv-python>=3.3.0 pillow progressbar2 tensorflow>=2.3.0`
 
 ### 2. GPU Configuration (Optional)
 :warning: This plugin is built using tensorflow as a machine learning framework. For faster process, it is highly recommended to use a GPU. You can find complete instructions for GPU Support through [this link](https://www.tensorflow.org/install/gpu#software_requirements).
+
+For Windows user, we need to add the CUDA®, CUPTI, and cuDNN installation directories to the %PATH% environmental variable on QGIS. Click `Settings > Options`, on the System Tab choose `Environment` then check `Use custom variables (restart required - include separators)`.
+
+Click Plus (+) button, then add configuration bellow:
+
+- `Apply: Prepend`
+- `Variable: PATH`
+- `Value: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\extras\CUPTI\lib64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include;`
 
 ### 3. Plugin Installation
 There are two ways to install this plugin.
@@ -19,7 +34,14 @@ There are two ways to install this plugin.
 
 ### 4. Pick a Model
 
-xxx
+There are three models that have been trained using Backbone Resnet101. You can download the three models in the table below:
+| Satellite Imagery Paltform  | mAP@0.5 | Model (inference) |
+| --------------------------- | ------- | -------------------- |
+| Pleiades Satellite Imagery  | 0.903   | [Pleiades-Resnet101.h5](https://github.com/p4wlppmipb/OPTIMAL-IPB/releases/download/0.1/Pleiades-Resnet101.h5) |
+| Geoeye Satellite Imagery    | 0.900   | [Geoeye-Resnet101.h5](https://github.com/p4wlppmipb/OPTIMAL-IPB/releases/download/0.1/Geoeye-Resnet101.h5)     |
+| Google Satellite Imagery    | 0.925   | [Google-Resnet101.h5](https://github.com/p4wlppmipb/OPTIMAL-IPB/releases/download/0.1/Google-Resnet101.h5)     |
+
+Copy all models you downloads to your plugin directory. Eg: `C:\Users\Username\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\optimal-ipb\models`.
 
 ## Usage
 
@@ -43,4 +65,4 @@ We very much welcome contributions from all developers out there. This project i
 
 OPTIMAL-IPB is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
-<em>Copyright © 2018-2022 Muhammad Nurdin, Didit Okta Pribadi, La Ode Syamsul Iman. [P4W-LPPM IPB](https://p4w.ipb.ac.id/en/)</em>
+<em>Copyright © 2018-2022 Muhammad Nurdin, Didit Okta Pribadi, La Ode Syamsul Iman. @ [P4W/CRESTPENT](https://p4w.ipb.ac.id)-LPPM, IPB University</em>
