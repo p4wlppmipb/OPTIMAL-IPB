@@ -4,7 +4,7 @@ OPTIMAL-IPB (Oil Palm Trees Identification based on Machine Learning – IPB Uni
 
 ## Installation Steps
 
-:warning: This plugin was developed in the python 3.7 environment contained in QGIS version 3.10 A Coruña. And works with keras version 2.4 and tensorflow version 2.3.0.
+:warning: This plugin was developed in python 3.7 environment contained in QGIS version 3.10 A Coruña, and works with keras version 2.4.3 and tensorflow version 2.3.0.
 
 ### 1. Package Required
 
@@ -47,7 +47,13 @@ Copy all models you downloads to your plugin directory. Eg: `C:\Users\Username\A
 
 ## Usage
 
-xxxx
+This plugin can be accessed under Plugins menu under `Calculate > OPTIMAL-IPB` or in the Processing Toolbox under `OPTIMAL-IPB > OPTIMAL-IPB` section. As shown in the image below:
+
+<img src='imgs/Readme01.png'>
+
+Then you can input your raster layer and select your output layer to save:
+
+<img src='imgs/Readme02.png'>
 
 ## Sources
 
