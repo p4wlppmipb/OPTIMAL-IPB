@@ -1,8 +1,10 @@
 # OPTIMAL-IPB
 
-OPTIMAL-IPB (Oil Palm Trees Identification based on Machine Learning – IPB University) is an open access plugin in Quantum GIS software used to detect oil palm trees canopy on high-resolution satellite images. This plugin was developed based on deep learning models on Retinanet architecture implemented on the repository by [Fizyr](https://github.com/fizyr/keras-retinanet). Some modifications were applied to enhance the model’s accuracy in detecting oil palm trees canopy as small objects. OPTIMAL-IPB was built by researchers from the [Center for Regional System, Analysis, Planning and Development (P4W/CRESTPENT)](https://p4w.ipb.ac.id), IPB University, Indonesia. It was based on research funded by the [Indonesia Endowment Fund for Education (LPDP)](https://lpdp.kemenkeu.go.id) – the Ministry of Finance.
+OPTIMAL-IPB (Oil Palm Trees Identification based on Machine Learning – IPB University) is an open access plugin in Quantum GIS software used to detect oil palm trees canopy on high-resolution satellite images. This plugin was developed based on deep learning models on Retinanet architecture implemented on the repository by Fizyr. Some modifications were applied to enhance the model’s accuracy in detecting oil palm trees canopy as small objects. OPTIMAL_IPB was built by researchers from the [Center for Regional System, Analysis, Planning and Development (P4W/CRESTPENT)](https://p4w.ipb.ac.id), IPB University, Indonesia. It was based on research funded by RISPRO program held by the [Indonesia Endowment Fund for Education (LPDP)](https://lpdp.kemenkeu.go.id) – the Ministry of Finance.
 
 ## Installation Steps
+
+:warning: This plugin was developed in the python 3.7 environment contained in QGIS version 3.10 A Coruña. And works with keras version 2.4 and tensorflow version 2.3.0.
 
 ### 1. Package Required
 
@@ -10,14 +12,14 @@ Some packages need to be installed in the QGIS environment first. There are two 
 
 #### - Package installation via python console in QGIS
 
-Open python console in QGIS and run `import pip` then `pip.main(['install', '-q', '--disable-pip-version-check', 'scipy', 'cython', 'keras-resnet==0.2.0', 'opencv-python>=3.3.0', 'pillow', 'progressbar2', 'tensorflow>=2.3.0'])` to install all the prerequisites.
+Open python console in QGIS and run `import pip` then `pip.main(['install', '-q', '--disable-pip-version-check', 'scipy', 'cython', 'keras-resnet==0.2.0', 'opencv-python>=3.3.0', 'pillow', 'progressbar2', 'tensorflow>=2.3.0', 'keras>=2.4.3'])` to install all the prerequisites.
 
 #### - Module installation via OSGeo4W Shell
 
-Open OSGeo4W Shell then run this command `python3 -m pip install scipy cython keras-resnet==0.2.0 opencv-python>=3.3.0 pillow progressbar2 tensorflow>=2.3.0`
+Open OSGeo4W Shell then run this command `python3 -m pip install scipy cython keras-resnet==0.2.0 opencv-python>=3.3.0 pillow progressbar2 tensorflow>=2.3.0 keras>=2.4.3`
 
 ### 2. GPU Configuration (Optional)
-:warning: This plugin is built using tensorflow as a machine learning framework. For faster process, it is highly recommended to use a GPU. You can find complete instructions for GPU Support through [this link](https://www.tensorflow.org/install/gpu#software_requirements).
+This plugin is built using tensorflow as a machine learning framework. For faster process, it is highly recommended to use a GPU. You can find complete instructions for GPU Support through [this link](https://www.tensorflow.org/install/gpu#software_requirements).
 
 For Windows user, we need to add the CUDA®, CUPTI, and cuDNN installation directories to the %PATH% environmental variable on QGIS. Click `Settings > Options`, on the System Tab choose `Environment` then check `Use custom variables (restart required - include separators)`.
 
@@ -63,7 +65,6 @@ We very much welcome contributions from all developers out there. This project i
 
 ## License
 
-OPTIMAL-IPB is a 
-free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+OPTIMAL-IPB is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
 <em>Copyright © 2018-2022 Muhammad Nurdin, Didit Okta Pribadi, La Ode Syamsul Iman. @ [P4W/CRESTPENT](https://p4w.ipb.ac.id)-LPPM, IPB University</em>
