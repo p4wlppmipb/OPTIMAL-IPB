@@ -1,12 +1,25 @@
 # OPTIMAL-IPB
 
-OPTIMAL-IPB (Oil Palm Trees Identification based on Machine Learning – IPB University) adalah sebuah plugin dalam aplikasi Quantum GIS yang dapat digunakan secara terbuka (open access) untuk mengidentifikasi objek tajuk pohon kelapa sawit pada Citra Satelit Resolusi Tinggi (CSRT) berdasarkan model yang dikembangkan berbasis pendekatan deep learning pada arsitektur retinanet yang diimplemetasikan pada repositori oleh [Fizyr](https://github.com/fizyr/keras-retinanet).
+OPTIMAL-IPB (Oil Palm Trees Identification based on Machine Learning – IPB University) is an open access plugin in Quantum GIS software used to detect oil palm trees canopy on high-resolution satellite images. This plugin was developed based on deep learning models on Retinanet architecture implemented on the repository by [Fizyr](https://github.com/fizyr/keras-retinanet). Some modifications were applied to enhance the model’s accuracy in detecting oil palm trees canopy as small objects. OPTIMAL-IPB was built by researchers from the Center for Regional System, Analysis, Planning and Development (P4W/CRESTPENT), IPB University, Indonesia. It was based on research funded by the Indonesia Endowment Fund for Education (LPDP) – the Ministry of Finance.
 
-## Installation
+## Installation Steps
 
+### 1. Module Required
+Open python console in QGIS and run `import pip` then `pip.main(['install', '-q', '--disable-pip-version-check', 'six ', 'scipy', 'cython', 'keras-resnet==0.2.0', 'h5py', 'keras', 'matplotlib', 'numpy>=1.14', 'opencv-python>=3.3.0', 'pillow', 'progressbar2', 'tensorflow>=2.3.0'])` to install all the prerequisites.
+
+The installation process time depends on the internet connection speed.
+
+### 2. GPU Configuration (Optional)
+:warning: This plugin is built using tensorflow as a machine learning framework. For faster process, it is highly recommended to use a GPU. You can find complete instructions for GPU Support through [this link](https://www.tensorflow.org/install/gpu#software_requirements).
+
+### 3. Plugin Installation
 There are two ways to install this plugin.
 1. From official QGIS Plugin Repository - Use the QGIS Plugins menu to install the OPTIMAL-IPB Plugin (see [QGIS manual](http://docs.qgis.org/latest/en/docs/user_manual/plugins/plugins.html)).
 2. From [Zipfile](https://github.com/p4wlppmipb/OPTIMAL-IPB/archive/master.zip) of this repository. Then follow this [instruction](http://docs.qgis.org/latest/en/docs/user_manual/plugins/plugins.html#the-install-from-zip-tab).
+
+### 4. Pick a Model
+
+xxx
 
 ## Usage
 
