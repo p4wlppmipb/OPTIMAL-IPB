@@ -47,11 +47,11 @@ Copy all models you downloads to your plugin directory. Eg: `C:\Users\Username\A
 
 ## Usage
 
-This plugin can be accessed under Plugins menu under `Calculate > OPTIMAL-IPB` or in the Processing Toolbox under `OPTIMAL-IPB > OPTIMAL-IPB` section. As shown in the image below:
+This plugin can be accessed under Plugins menu, then select `Calculate > OPTIMAL-IPB` or in the Processing Toolbox, then select `OPTIMAL-IPB > OPTIMAL-IPB` as shown in the image below:
 
 <img src='imgs/Readme01.png'>
 
-Then you can input your raster layer and select your output layer to save:
+Afterward you can input your raster layer and select your output layer to save:
 
 <img src='imgs/Readme02.png'>
 
