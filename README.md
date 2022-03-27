@@ -51,7 +51,7 @@ This plugin can be accessed under Plugins menu, then select `Calculate > OPTIMAL
 
 <img src='imgs/Readme01.png'>
 
-Afterward you can input your raster layer and select your output layer to save, then click 'run':
+Afterward you can input your raster layer and select your output layer to save, then click `run`:
 
 <img src='imgs/Readme02.png'>
 
