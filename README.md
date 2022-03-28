@@ -73,4 +73,4 @@ We very much welcome contributions from all developers out there. This project i
 
 OPTIMAL-IPB is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
-<em>Copyright © 2018-2022 Muhammad Nurdin, Didit Okta Pribadi, La Ode Syamsul Iman, Ernan Rustiadi. @ [P4W/CRESTPENT](https://p4w.ipb.ac.id)-LPPM, IPB University</em>
+<em>Copyright © 2018-2022 Ernan Rustiadi, Didit Okta Pribadi, La Ode Syamsul Iman, Muhammad Nurdin. @ [P4W/CRESTPENT](https://p4w.ipb.ac.id)-LPPM, IPB University</em>
