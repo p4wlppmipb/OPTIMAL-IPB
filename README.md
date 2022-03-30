@@ -12,11 +12,11 @@ Some packages need to be installed in the QGIS environment first. There are two 
 
 #### - Package installation via python console in QGIS
 
-Open python console in QGIS and run `import pip` then `pip.main(['install', '-q', '--disable-pip-version-check', 'scipy', 'cython', 'keras-resnet==0.2.0', 'opencv-python>=3.3.0', 'pillow', 'progressbar2', 'tensorflow>=2.3.0', 'keras>=2.4.3'])` to install all the prerequisites.
+Open python console in QGIS and run `import pip` then `pip.main(['install', '-q', '--disable-pip-version-check', 'scipy', 'cython', 'keras-resnet', 'opencv-python', 'pillow', 'progressbar2', 'tensorflow==2.3.0', 'keras==2.4.3'])` to install all the prerequisites.
 
 #### - Module installation via OSGeo4W Shell
 
-Open OSGeo4W Shell then run this command `python3 -m pip install scipy cython keras-resnet==0.2.0 opencv-python>=3.3.0 pillow progressbar2 tensorflow>=2.3.0 keras>=2.4.3`
+Open OSGeo4W Shell then run this command `pip install scipy cython keras-resnet opencv-python pillow progressbar2 tensorflow==2.3.0 keras==2.4.3`
 
 ### 2. GPU Configuration (Optional)
 This plugin is built using tensorflow as a machine learning framework. For faster process, it is highly recommended to use a GPU. You can find complete instructions for GPU Support through [this link](https://www.tensorflow.org/install/gpu#software_requirements).
