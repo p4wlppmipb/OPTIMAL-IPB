@@ -27,7 +27,7 @@ tags=optimal,ipb,oil palm,retinanet
 
 homepage=https://github.com/p4wlppmipb/OPTIMAL-IPB
 category=Analysis
-icon=icon.png
+icon=logo.png
 # experimental flag
 experimental=True
 
@@ -37,7 +37,7 @@ deprecated=False
 # Since QGIS 3.8, a comma separated list of plugins to be installed
 # (or upgraded) can be specified.
 # Check the documentation for more information.
-# plugin_dependencies=
+# plugin_dependencies=scipy,cython,keras-resnet,opencv-python,pillow,progressbar2,tensorflow==2.3.0,keras==2.4.3
 
 Category of the plugin: Raster, Vector, Database or Web
 # category=

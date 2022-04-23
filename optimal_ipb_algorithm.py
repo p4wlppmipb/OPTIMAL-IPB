@@ -42,6 +42,8 @@ from qgis.core import (QgsProcessing,
                        QgsFeature,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterRasterLayer,
+                       QgsProcessingParameterEnum,
+                       QgsProcessingParameterNumber,
                        QgsProcessingParameterFeatureSink)
 
 import numpy as np
@@ -53,6 +55,7 @@ import inspect
 from osgeo import gdal
 
 from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtWidgets import QMessageBox
 
 from .keras_retinanet.models import load_model
 from .keras_retinanet.utils.image import preprocess_image, resize_image
@@ -64,54 +67,60 @@ from .helpers import pixel2coord
 from .helpers import non_max_suppression_fast
 from .helpers import map_uint16_to_uint8
 
-scorethreshold = 0.5
 iouthreshold = 0.5
 bboxes = []
+modelsList = []
 
-class minmax: 
-    def __init__(self, minimum, maximum): 
-        self.minimum = minimum 
+cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
+
+for file in os.listdir(os.path.join(cmd_folder, 'models/')):
+    if file.endswith(".h5"):
+        modelsList.append(file)
+
+class minmax:
+    def __init__(self, minimum, maximum):
+        self.minimum = minimum
         self.maximum = maximum
 
-def detect_palm(model, ds, x, y, winW, winH, minmaxlist):
+def detect_palm(model, ds, x, y, winW, winH, minmaxlist, scorethreshold):
     # crop image
     a_image = ds.ReadAsArray(x, y, winW, winH)
     datatype = ds.GetRasterBand(1).DataType
-    
+
     normalizedImg = []
-    
+
     if not datatype == 1:
         for i in range(3):
             band_255 = map_uint16_to_uint8(a_image[i], int(minmaxlist[i].minimum), int(minmaxlist[i].maximum))
             normalizedImg.append(band_255)
-            
+
         normalizedImg = np.dstack((normalizedImg[2], normalizedImg[1], normalizedImg[0]))
-        
+
     else:
         normalizedImg = np.dstack(((a_image[2],a_image[1],a_image[0])))
-    
+
     # preprocess image for network
     image = preprocess_image(normalizedImg)
     image, scale = resize_image(image)
-    
+
     # process image
     boxes, scores, labels = model.predict_on_batch(np.expand_dims(image, axis=0))
-    
+
     # correct for image scale
     boxes /= scale
-    
+
     # select indices which have a score above the threshold
     indices = np.where(scores[0, :] >= scorethreshold)[0]
-    
+
     # select those scores
     scores = scores[0][indices]
-    
+
     # find the order with which to sort the scores
     scores_sort = np.argsort(-scores)
-    
+
     # select detections
     image_boxes = boxes[0, indices[scores_sort], :]
-    
+
     for i in indices:
         b = np.array(image_boxes[i,:]).astype(int)
         x1 = b[0] + x
@@ -119,7 +128,7 @@ def detect_palm(model, ds, x, y, winW, winH, minmaxlist):
         x2 = b[2] + x
         y2 = b[3] + y
         bboxes.append([x1, y1, x2, y2])
-    
+
     return bboxes
     #bscores.extend(scores)
 
@@ -143,6 +152,8 @@ class OptimalIpbAlgorithm(QgsProcessingAlgorithm):
 
     OUTPUT = 'OUTPUT'
     INPUT = 'INPUT'
+    OPTIMAL = 'MODEL'
+    mAP = 'mAP'
 
     def initAlgorithm(self, config):
         """
@@ -160,6 +171,30 @@ class OptimalIpbAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
+        # We add the input vector features source. It can have any kind of
+        # geometry.
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.OPTIMAL,
+                self.tr('Select Models'),
+                options=modelsList,
+                defaultValue=0,
+                optional=False
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                name=self.mAP,
+                description=self.tr('mAP (mean Average Precision)'),
+                type=QgsProcessingParameterNumber.Double,
+                defaultValue=0.5,
+                optional=False,
+                minValue=0,
+                maxValue=1
+            )
+        )
+
         # We add a feature sink in which to store our processed features (this
         # usually takes the form of a newly created vector layer when the
         # algorithm is run in QGIS).
@@ -170,95 +205,100 @@ class OptimalIpbAlgorithm(QgsProcessingAlgorithm):
                 QgsProcessing.TypeVectorPoint
             )
         )
-    
+
+        if len(modelsList) <= 0:
+            QMessageBox.information(None, 'OPTIMAL-IPB Plugins', 'You dont have models downloaded yet. Please download latest model from our repository through this link: <a href="https://github.com/p4wlppmipb/OPTIMAL-IPB/releases">https://github.com/p4wlppmipb/OPTIMAL-IPB/releases</a> and follow the instruction.')
+
     def processAlgorithm(self, parameters, context, feedback):
         """
         Here is where the processing itself takes place.
         """
-        
+
         (winW, winH, stepSize) = (500, 500, 470)
-        
+
         # load model
-        model = load_model(r'/export/GOOGLE500-101.h5', backbone_name='resnet101')
-        source = self.parameterAsRasterLayer(parameters, self.INPUT, context)
-        
+        model_name = modelsList[self.parameterAsEnum(parameters, self.OPTIMAL, context)]
+        model = load_model(os.path.join(cmd_folder, 'models/', model_name), backbone_name='resnet101')
+
         # prepare writer
         outFeat = QgsFeature()
         fields = QgsFields()
         fields.append(QgsField('Object', QVariant.String))
         outFeat.setFields(fields)
-        
+
         # get CRS from raster source
+        source = self.parameterAsRasterLayer(parameters, self.INPUT, context)
         ds = gdal.Open(source.source())
         width = ds.RasterXSize
         height = ds.RasterYSize
         rastercount = ds.RasterCount
         datatype = ds.GetRasterBand(1).DataType
         minmaxlist = []
-        
+
         for bandId in range(ds.RasterCount):
             bandId = bandId + 1
             band = ds.GetRasterBand(bandId)
             band_arr_tmp = band.ReadAsArray()
             min, max = np.percentile(band_arr_tmp, (2, 98))
             minmaxlist.append( minmax(min, max) )
-        
-        #create the output sink
-        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT, context, fields, 1, source.crs())
-        
+
+        mAP_val = self.parameterAsDouble(parameters, self.mAP, context)
         for (x, y) in sliding_window(width, height, stepSize):
             # Stop the algorithm if cancel button has been clicked
             if feedback.isCanceled():
                 break
-            
+
             # Stop sliding windows if widows end
             if x + winW > width and y + winH > height:
                 xl = width - winW
                 yl = height - winH
-                detect_palm(model, ds, xl, yl, winW, winH, minmaxlist)
+                detect_palm(model, ds, xl, yl, winW, winH, minmaxlist, mAP_val)
                 continue
 
             if x + winW > width:
                 xl = width - winW
-                detect_palm(model, ds, xl, y, winW, winH, minmaxlist)
+                detect_palm(model, ds, xl, y, winW, winH, minmaxlist, mAP_val)
                 continue
-            
+
             if y + winH > height:
                 yl = height - winH
-                detect_palm(model, ds, x, yl, winW, winH, minmaxlist)
+                detect_palm(model, ds, x, yl, winW, winH, minmaxlist, mAP_val)
                 continue
-            
-            detect_palm(model, ds, x, y, winW, winH, minmaxlist)
-                
+
+            detect_palm(model, ds, x, y, winW, winH, minmaxlist, mAP_val)
+
         bboxeses = np.array(bboxes, dtype=np.float32)
-        
+
         # non max suppression on overlay bboxes
         new_boxes = non_max_suppression_fast(bboxeses, overlapThresh=iouthreshold)
-        
+
+        #create the output sink
+        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT, context, fields, 1, source.crs())
+
         for jk in range(new_boxes.shape[0]):
-            
+
             b = np.array(new_boxes[jk,:]).astype(int)
-            
+
             x1 = b[0]
             y1 = b[1]
             x2 = b[2]
             y2 = b[3]
-            
+
             # Centroid
             xc  = (x1 + x2) / 2
             yc  = (y1 + y2) / 2
-            
+
             # get geo coordinate
             (coor_x, coor_y)  = pixel2coord(ds, xc, yc)
-            
+
             # append coordinate to array point
             outFeat.setGeometry( QgsPoint( coor_x, coor_y ) )
             outFeat.setAttributes(['Sawit'])
-            
+
             #feedback.setProgress(int(current * total))
-            
+
             sink.addFeature(outFeat, QgsFeatureSink.FastInsert)
-        
+
         return {self.OUTPUT: dest_id}
 
     def name(self):
