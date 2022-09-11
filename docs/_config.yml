@@ -22,8 +22,8 @@ title: OPTIMAL-IPB
 email: p4w@apps.ipb.ac.id
 description: >- # this means to ignore newlines until "baseurl:"
   OPTIMAL-IPB (Oil Palm Trees Identification based on Machine Learning – IPB University) is an open access plugin in Quantum GIS software used to detect oil palm trees canopy on high-resolution satellite images.
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: "https://p4wlppmipb.github.io" # the subpath of your site, e.g. /blog
+url: "/OPTIMAL-IPB/" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: p4wlppmipb
 github_username:  p4wlppmipb
 
