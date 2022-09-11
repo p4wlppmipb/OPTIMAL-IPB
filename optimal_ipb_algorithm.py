@@ -36,7 +36,11 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
+                       QgsGeometry,
+                       QgsCircle,
+                       QgsPointXY,
                        QgsPoint,
+                       QgsPolygon,
                        QgsFields,
                        QgsField,
                        QgsFeature,
@@ -44,7 +48,8 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
-                       QgsProcessingParameterFeatureSink)
+                       QgsProcessingParameterFeatureSink,
+                       QgsMessageLog)
 
 import numpy as np
 import time
@@ -67,15 +72,11 @@ from .helpers import pixel2coord
 from .helpers import non_max_suppression_fast
 from .helpers import map_uint16_to_uint8
 
-iouthreshold = 0.5
 bboxes = []
 modelsList = []
+outputType = ["Point", "Bounding Box", "Circle"]
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
-
-for file in os.listdir(os.path.join(cmd_folder, 'models/')):
-    if file.endswith(".h5"):
-        modelsList.append(file)
 
 class minmax:
     def __init__(self, minimum, maximum):
@@ -130,7 +131,14 @@ def detect_palm(model, ds, x, y, winW, winH, minmaxlist, scorethreshold):
         bboxes.append([x1, y1, x2, y2])
 
     return bboxes
-    #bscores.extend(scores)
+
+def geom_type(argument):
+    switcher = {
+        0: 1,
+        1: 3,
+        2: 3,
+    }
+    return switcher.get(argument, 3)
 
 class OptimalIpbAlgorithm(QgsProcessingAlgorithm):
     """
@@ -154,12 +162,17 @@ class OptimalIpbAlgorithm(QgsProcessingAlgorithm):
     INPUT = 'INPUT'
     OPTIMAL = 'MODEL'
     mAP = 'mAP'
+    TYPE = 'TYPE'
 
     def initAlgorithm(self, config):
         """
         Here we define the inputs and output of the algorithm, along
         with some other properties.
         """
+        modelsList.clear()
+        for file in os.listdir(os.path.join(cmd_folder, 'models/')):
+            if file.endswith(".h5"):
+                modelsList.append(file)
 
         # We add the input vector features source. It can have any kind of
         # geometry.
@@ -194,15 +207,22 @@ class OptimalIpbAlgorithm(QgsProcessingAlgorithm):
                 maxValue=1
             )
         )
+        
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.TYPE,
+                self.tr('Select output type'),
+                options=outputType,
+                defaultValue=0,
+                optional=False
+            )
+        )
 
-        # We add a feature sink in which to store our processed features (this
-        # usually takes the form of a newly created vector layer when the
-        # algorithm is run in QGIS).
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
                 self.tr('Output Layer'),
-                QgsProcessing.TypeVectorPoint
+                QgsProcessing.TypeVectorAnyGeometry
             )
         )
 
@@ -213,18 +233,12 @@ class OptimalIpbAlgorithm(QgsProcessingAlgorithm):
         """
         Here is where the processing itself takes place.
         """
-
+        iouthreshold = 0.5
         (winW, winH, stepSize) = (500, 500, 470)
 
         # load model
         model_name = modelsList[self.parameterAsEnum(parameters, self.OPTIMAL, context)]
         model = load_model(os.path.join(cmd_folder, 'models/', model_name), backbone_name='resnet101')
-
-        # prepare writer
-        outFeat = QgsFeature()
-        fields = QgsFields()
-        fields.append(QgsField('Object', QVariant.String))
-        outFeat.setFields(fields)
 
         # get CRS from raster source
         source = self.parameterAsRasterLayer(parameters, self.INPUT, context)
@@ -272,8 +286,16 @@ class OptimalIpbAlgorithm(QgsProcessingAlgorithm):
         # non max suppression on overlay bboxes
         new_boxes = non_max_suppression_fast(bboxeses, overlapThresh=iouthreshold)
 
-        #create the output sink
-        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT, context, fields, 1, source.crs())
+        # prepare writer
+        outFeat = QgsFeature()
+        fields = QgsFields()
+        fields.append(QgsField('Object', QVariant.String))
+        outFeat.setFields(fields)
+
+        # Prepare sink for output
+        type_val = self.parameterAsDouble(parameters, self.TYPE, context)
+        type_opt = geom_type(type_val)
+        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT, context, fields, type_opt, source.crs())
 
         for jk in range(new_boxes.shape[0]):
 
@@ -284,20 +306,36 @@ class OptimalIpbAlgorithm(QgsProcessingAlgorithm):
             x2 = b[2]
             y2 = b[3]
 
-            # Centroid
+            # Get centorid
             xc  = (x1 + x2) / 2
             yc  = (y1 + y2) / 2
-
-            # get geo coordinate
             (coor_x, coor_y)  = pixel2coord(ds, xc, yc)
+            centroid = QgsPoint(coor_x, coor_y)
 
-            # append coordinate to array point
-            outFeat.setGeometry( QgsPoint( coor_x, coor_y ) )
+            # Get geo coordinate of bbox
+            (coor_x1, coor_y1)  = pixel2coord(ds, x1, y1)
+            (coor_x2, coor_y2)  = pixel2coord(ds, x2, y1)
+            (coor_x3, coor_y3)  = pixel2coord(ds, x2, y2)
+            (coor_x4, coor_y4)  = pixel2coord(ds, x1, y2)
+            polygon = [[QgsPointXY(coor_x1, coor_y1), QgsPointXY(coor_x2, coor_y2), QgsPointXY(coor_x3, coor_y3), QgsPointXY(coor_x4, coor_y4)]]
+            diameter = coor_x2 - coor_x1
+
+            if type_val == 0:
+                # -- Point --
+                outFeat.setGeometry( centroid )
+            elif type_val == 1:
+                # -- Bbox --
+                outFeat.setGeometry( QgsGeometry.fromPolygonXY(polygon) )
+            elif type_val == 2:
+                # -- Circle --
+                circle = QgsCircle.fromCenterDiameter(centroid, diameter).toPolygon().asWkt()
+                outFeat.setGeometry( QgsGeometry.fromWkt(circle) )
+
             outFeat.setAttributes(['Sawit'])
 
-            #feedback.setProgress(int(current * total))
-
             sink.addFeature(outFeat, QgsFeatureSink.FastInsert)
+
+        bboxes.clear()
 
         return {self.OUTPUT: dest_id}
 
@@ -334,6 +372,9 @@ class OptimalIpbAlgorithm(QgsProcessingAlgorithm):
         formatting characters.
         """
         return ''
+
+    def shortHelpString(self):
+        return self.tr("OPTIMAL-IPB (Oil Palm Trees Identification based on Machine Learning – IPB University) is an open access plugin in Quantum GIS software used to detect oil palm trees canopy on high-resolution satellite images. \n\nThis plugin was developed based on deep learning models on Retinanet architecture implemented on the repository by Fizyr. Some modifications were applied to enhance the model’s accuracy in detecting oil palm trees canopy as small objects. \n\nHow to use: \n\n1. Input your raster layer. \n\n2. Select model previously downloaded from our repository. \n\n3. Adjust mAP (mean Average Precission). default:0.5. \n\n4. Select output type from point, bounding box or circle. \n\n5. Select your output layer to save. \n\n5. Click run. \n\nOPTIMAL-IPB was built by researchers from the Center for Regional System, Analysis, Planning and Development (P4W/CRESTPENT), IPB University, Indonesia. It was based on research funded by RISPRO program held by the Indonesia Endowment Fund for Education (LPDP) – the Ministry of Finance.")
 
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)

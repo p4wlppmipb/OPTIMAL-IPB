@@ -51,7 +51,7 @@ This plugin can be accessed under Plugins menu, then select `Calculate > OPTIMAL
 
 <img src='imgs/Readme01.png'>
 
-Afterward you can input your raster layer then select model previously downloaded. You can change the default value of mean Average Precision (mAP) during the detection process and select your output layer to save, then click `run`:
+Afterward you can input your raster layer then select model previously downloaded. You can change the default value of mean Average Precision (mAP) during the detection process. Select output type from three types of output that can be generated namely point, bounding-box and canopy circle. Then select your output layer to save, then click `run`:
 
 <img src='imgs/Readme02.png'>
 
