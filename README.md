@@ -75,4 +75,4 @@ OPTIMAL-IPB is a free software; you can redistribute it and/or modify it under t
 
 Intellectual property rights (IPR): [EC00202227184](https://e-hakcipta.dgip.go.id/index.php/c?code=OTk2Njg4MGQ5MmFlNGYzMjljNDA5M2JmNGUxOTg0YjAK), 22 April 2022
 
-<em>Copyright © 2018-2022 Ernan Rustiadi, Didit Okta Pribadi, La Ode Syamsul Iman, Muhammad Nurdin. @ [P4W/CRESTPENT](https://p4w.ipb.ac.id)-LPPM, IPB University</em>
+<em>Copyright © 2018-2022 Didit Okta Pribadi, Ernan Rustiadi, La Ode Syamsul Iman, Muhammad Nurdin. @ [P4W/CRESTPENT](https://p4w.ipb.ac.id)-LPPM, IPB University</em>
