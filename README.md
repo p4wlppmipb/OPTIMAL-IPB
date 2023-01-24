@@ -55,12 +55,15 @@ Afterward you can input your raster layer then select model previously downloade
 
 <img src='imgs/Readme02.png'>
 
+:warning: Update: Now score attribute available on output for each object
+
 ## Sources
 
 1) [fizyr/keras-retinanet](https://github.com/fizyr/keras-retinanet)
 2) [Martin Zlocha](https://github.com/martinzlocha/anchor-optimization)
 3) [(Faster) Non-Maximum Suppression in Python](https://pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/) by Adrian Rosebrock
 4) [Sliding Windows for Object Detection with Python and OpenCV](https://pyimagesearch.com/2015/03/23/sliding-windows-for-object-detection-with-python-and-opencv/) by Adrian Rosebrock
+5) Update: [Large Scale Non maximum Suppression (LSNMS)](https://github.com/remydubois/lsnms) by Rémy Dubois
 
 ## For developers
 
