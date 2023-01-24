@@ -57,6 +57,7 @@ import pandas
 import os
 import inspect
 
+from lsnms import nms
 from osgeo import gdal
 
 from qgis.PyQt.QtCore import QVariant
@@ -73,6 +74,7 @@ from .helpers import non_max_suppression_fast
 from .helpers import map_uint16_to_uint8
 
 bboxes = []
+scoreses = []
 modelsList = []
 outputType = ["Point", "Bounding Box", "Circle"]
 
@@ -130,7 +132,7 @@ def detect_palm(model, ds, x, y, winW, winH, minmaxlist, scorethreshold):
         y2 = b[3] + y
         bboxes.append([x1, y1, x2, y2])
 
-    return bboxes
+    scoreses.append(scores)
 
 def geom_type(argument):
     switcher = {
@@ -282,14 +284,18 @@ class OptimalIpbAlgorithm(QgsProcessingAlgorithm):
             detect_palm(model, ds, x, y, winW, winH, minmaxlist, mAP_val)
 
         bboxeses = np.array(bboxes, dtype=np.float32)
+        flatten_score = np.concatenate(scoreses)
 
         # non max suppression on overlay bboxes
-        new_boxes = non_max_suppression_fast(bboxeses, overlapThresh=iouthreshold)
+        # new_boxes = non_max_suppression_fast(bboxeses, overlapThresh=iouthreshold)
+        keep = nms(bboxeses, flatten_score, iou_threshold=0.3)
+        new_boxes = bboxeses[keep]
+        new_scores = flatten_score[keep]
 
         # prepare writer
         outFeat = QgsFeature()
         fields = QgsFields()
-        fields.append(QgsField('Object', QVariant.String))
+        fields.append(QgsField('Score', QVariant.Double, 'double', 10, 11))
         outFeat.setFields(fields)
 
         # Prepare sink for output
@@ -300,6 +306,7 @@ class OptimalIpbAlgorithm(QgsProcessingAlgorithm):
         for jk in range(new_boxes.shape[0]):
 
             b = np.array(new_boxes[jk,:]).astype(int)
+            c = new_scores[jk]
 
             x1 = b[0]
             y1 = b[1]
@@ -331,11 +338,12 @@ class OptimalIpbAlgorithm(QgsProcessingAlgorithm):
                 circle = QgsCircle.fromCenterDiameter(centroid, diameter).toPolygon().asWkt()
                 outFeat.setGeometry( QgsGeometry.fromWkt(circle) )
 
-            outFeat.setAttributes(['Sawit'])
+            outFeat.setAttribute(0, str(c))
 
             sink.addFeature(outFeat, QgsFeatureSink.FastInsert)
-
+        
         bboxes.clear()
+        scoreses.clear()
 
         return {self.OUTPUT: dest_id}
 
